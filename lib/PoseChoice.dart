@@ -6,10 +6,12 @@ import 'package:tremor/Pose3/Pose3Record_screen.dart';
 import 'package:tremor/Progressing_screen.dart';
 import 'dart:ui';
 import 'package:tremor/patientInfo_screen.dart';
+import 'package:tremor/local_utils/DrawingProvider.dart';
+import 'package:provider/provider.dart';
 
 class PoseChoice extends StatefulWidget {
   String patientNum;
-  PoseChoice({required this.patientNum});
+  PoseChoice({super.key, required this.patientNum});
 
   @override
   State<PoseChoice> createState() => _PoseChoiceState();
@@ -25,7 +27,8 @@ class _PoseChoiceState extends State<PoseChoice> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.orange,
-        title: Text('Patient # ${widget.patientNum}',style: Theme.of(context).textTheme.titleMedium),
+        title: Text('Patient # ${widget.patientNum}',
+            style: Theme.of(context).textTheme.titleMedium),
       ),
       body: Padding(
         padding: const EdgeInsets.all(60),
@@ -35,90 +38,117 @@ class _PoseChoiceState extends State<PoseChoice> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(onPressed: (){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            Pose1Record()),
-                  );
-                }, child:
-                Center(
-                  child: Text( first,
-                    style: TextStyle(color: Colors.black, fontSize: 20,fontWeight: FontWeight.bold),
-                  ),
-                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChangeNotifierProvider(
+                          create: (context) => DrawingProvider(),
+                          child: const Pose1Record(),
+                        ),
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
-                      side: BorderSide(width: 3, color: Colors.black),
+                      side: const BorderSide(width: 3, color: Colors.black),
                       elevation: 3,
                       shadowColor: Colors.black,
-                      fixedSize: Size.fromHeight(65),
+                      fixedSize: const Size.fromHeight(65),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20)
-                      ),
-                      backgroundColor: Colors.grey
-                  ),
-                ),
-                SizedBox(height: 30,),
-                ElevatedButton(onPressed: (){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            Pose2Record()),
-                  );
-                }, child:
-                    Center(
-                      child: Text( second,
-                        style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
+                          borderRadius: BorderRadius.circular(20)),
+                      backgroundColor: Colors.grey),
+                  child: Center(
+                    child: Text(
+                      first,
+                      style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
                     ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChangeNotifierProvider(
+                          create: (context) => DrawingProvider(),
+                          child: const Pose2Record(),
+                        ),
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
-                      side: BorderSide(width: 3, color: Colors.black),
+                      side: const BorderSide(width: 3, color: Colors.black),
                       elevation: 3,
                       shadowColor: Colors.black,
-                      fixedSize: Size.fromHeight(65),
+                      fixedSize: const Size.fromHeight(65),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)
+                          borderRadius: BorderRadius.circular(20)),
+                      backgroundColor: Colors.grey),
+                  child: Center(
+                    child: Text(
+                      second,
+                      style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChangeNotifierProvider(
+                          create: (context) => DrawingProvider(),
+                          child: const Pose3Record(),
+                        ),
                       ),
-                      backgroundColor: Colors.grey
-                  ),
-                ),
-                SizedBox(height: 30,),
-                ElevatedButton(onPressed: (){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            Pose3Record()),
-                  );
-                }, child:
-                  Center(
-                  child: Text( third,
-                    style: TextStyle(color: Colors.black, fontSize: 20,fontWeight: FontWeight.bold),
-                  ),
-                ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
-                      side: BorderSide(width: 3, color: Colors.black),
+                      side: const BorderSide(width: 3, color: Colors.black),
                       elevation: 3,
                       shadowColor: Colors.black,
-                      fixedSize: Size.fromHeight(65),
+                      fixedSize: const Size.fromHeight(65),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)
-                      ),
-                      backgroundColor: Colors.grey
+                          borderRadius: BorderRadius.circular(20)),
+                      backgroundColor: Colors.grey),
+                  child: Center(
+                    child: Text(
+                      third,
+                      style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ),
-                SizedBox(height: 40,),
-                IconButton(onPressed: (){
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            Progressing()),
-                  );
-                }, icon: Icon(Icons.upload_file_outlined, size: 40,))
-
+                const SizedBox(
+                  height: 40,
+                ),
+                IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const Progressing()),
+                      );
+                    },
+                    icon: const Icon(
+                      Icons.upload_file_outlined,
+                      size: 40,
+                    ))
               ],
             ),
           ),

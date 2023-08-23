@@ -5,24 +5,23 @@ import 'package:flutter_sensors/flutter_sensors.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:csv/csv.dart';
 import 'package:share/share.dart';
-import '../../dotinfo.dart';
 import 'package:sensors_plus/sensors_plus.dart' as s;
 import 'package:tremor/local_utils/DrawingProvider.dart';
 import 'package:provider/provider.dart';
-
-
+import '../../dotinfo.dart';
 
 class Pose1Record extends StatefulWidget {
+  const Pose1Record({super.key});
+
   @override
   State<Pose1Record> createState() => _Pose1RecordState();
 }
 
 class _Pose1RecordState extends State<Pose1Record> {
-
-  late double dWidth = MediaQuery.of(context).size.width;
-  late double dLength= MediaQuery.of(context).size.longestSide;
-  late double posX = dWidth/2;
-  late double posY = dLength/2.5;
+  late double dWidth;
+  late double dLength;
+  late double posX;
+  late double posY;
 
   bool _isRecording = false;
   int _secondsLeft = 60;
@@ -34,13 +33,29 @@ class _Pose1RecordState extends State<Pose1Record> {
   final List<List<dynamic>> _dataStorage = [];
 
   @override
+  void initState() {
+    super.initState();
+    _checkAccelerometerStatus();
+  }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    dWidth = MediaQuery.of(context).size.width;
+    dLength = MediaQuery.of(context).size.longestSide;
+    posX = dWidth / 2;
+    posY = dLength / 2.5;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    var p = DrawingProvider();
+    var p = context.read<DrawingProvider>();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
-        title: Text('POSE 1', style: Theme.of(context).textTheme.titleMedium),
+        title:
+            Text('POSE 1', style: Theme.of(context).textTheme.headlineMedium),
       ),
       body: Center(
         child: Column(
@@ -49,7 +64,9 @@ class _Pose1RecordState extends State<Pose1Record> {
             IconButton(
               iconSize: 20.0,
               icon: Icon(
-                _isRecording ? Icons.pause_circle_outlined : Icons.play_circle_outline,
+                _isRecording
+                    ? Icons.pause_circle_outlined
+                    : Icons.play_circle_outline,
                 color: Colors.red,
               ),
               onPressed: () {
@@ -71,67 +88,63 @@ class _Pose1RecordState extends State<Pose1Record> {
             ),
             SizedBox(
               width: dWidth,
-              height: dLength/1.5,
+              height: dLength / 1.5,
               child: StreamBuilder<s.GyroscopeEvent>(
                   stream: s.SensorsPlatform.instance.gyroscopeEvents,
-                  builder: (context, snapshot)
-                  {
-                    if (_isRecording==true && snapshot.hasData) {
+                  builder: (context, snapshot) {
+                    if (_isRecording && snapshot.hasData) {
                       posX = posX + (snapshot.data!.y * 40);
                       posY = posY + (snapshot.data!.x * 40);
-                      if(posY.abs()>dLength && posY>0)
-                        posY = dLength/2;
-                      if(posY.abs()<0)
-                        posY =0;
-                      if(posX.abs()>dWidth && posX>0)
-                        posX = dWidth;
-                      if(posX<0)
-                        posX = 0;
+
+                      if (posY.abs() > dLength && posY > 0) posY = dLength / 2;
+                      if (posY.abs() < 0) posY = 0;
+                      if (posX.abs() > dWidth && posX > 0) posX = dWidth;
+                      if (posX < 0) posX = 0;
+
                       p.drawStart(Offset(posX, posY));
                       p.drawing(Offset(posX, posY));
-                      p.drawStart(Offset(posX, posY));
-                      p.drawing(Offset(posX, posY));
-                    }else{}
+                    }
                     return Scaffold(
                       body: Stack(
-                          children: [
-                            Positioned.fill(
-                                child: CustomPaint(painter: DrawingPainter(p.lines),)),
-                            Transform.translate(
-                              offset: Offset(posX, posY),
-                              child: const CircleAvatar(
-                                radius: 20,
-                                backgroundColor: Colors.red,
-                              ),),
-                          ]),
+                        children: [
+                          Positioned.fill(
+                            child:
+                                CustomPaint(painter: DrawingPainter(p.lines)),
+                          ),
+                          Transform.translate(
+                            offset: Offset(posX, posY),
+                            child: const CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
                     );
-                  }
-              ),
+                  }),
             ),
-            SizedBox(height: 5),
+            const SizedBox(height: 5),
             IconButton(
-                iconSize:30,
+                iconSize: 30,
                 color: Colors.black,
                 onPressed: onResetPressed,
-                icon: Icon(Icons.restart_alt)),
+                icon: const Icon(Icons.restart_alt)),
           ],
         ),
       ),
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _checkAccelerometerStatus();
-  }
-  // Timer functionalities
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_isRecording) {
         setState(() {
           _secondsLeft--;
         });
+      }
+
+      if (_secondsLeft == 0) {
+        _resetTimer();
       }
     });
   }
@@ -144,14 +157,15 @@ class _Pose1RecordState extends State<Pose1Record> {
       _isRecording = false;
     });
   }
-  void onResetPressed(){
+
+  void onResetPressed() {
     _timer.cancel();
     setState(() {
       _isRecording = false;
       _secondsLeft = 60;
     });
   }
-  // Check if accelerometer is available on the device
+
   void _checkAccelerometerStatus() async {
     await SensorManager()
         .isSensorAvailable(Sensors.ACCELEROMETER)
@@ -162,7 +176,6 @@ class _Pose1RecordState extends State<Pose1Record> {
     });
   }
 
-  // Start reading accelerometer data and save to storage
   Future<void> _startAccelerometer() async {
     if (_accelSubscription != null) return;
     if (_accelAvailable) {
@@ -184,7 +197,6 @@ class _Pose1RecordState extends State<Pose1Record> {
     }
   }
 
-  // Reset timer and save data when recording finishes
   void _resetTimer() {
     if (_timer.isActive) {
       _timer.cancel();
@@ -194,53 +206,48 @@ class _Pose1RecordState extends State<Pose1Record> {
       _secondsLeft = 60;
     });
     _saveDataToCSV();
+    _stopAccelerometer();
   }
 
-  // Save the data to a CSV file
-  Future<void> _saveDataToCSV() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final path = directory.path;
-    final File file = File('$path/accelerometer_data.csv');
-
-    String csvData = const ListToCsvConverter().convert(_dataStorage);
-    await file.writeAsString(csvData);
-  }
-
-  // Share the saved CSV data
-  void _shareCSV() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final path = directory.path;
-    final File file = File('$path/accelerometer_data.csv');
-
-    await Share.shareFiles([file.path], subject: 'Accelerometer Data');
-  }
-
-  // Stop the accelerometer stream subscription
   void _stopAccelerometer() {
-    if (_accelSubscription == null) return;
     _accelSubscription?.cancel();
     _accelSubscription = null;
   }
 
-
+  Future<void> _saveDataToCSV() async {
+    String csv = const ListToCsvConverter().convert(_dataStorage);
+    final directory = await getExternalStorageDirectory();
+    final path = directory?.path;
+    final file = File('$path/accelerometer_data.csv');
+    await file.writeAsString(csv);
+    Share.shareFiles(['$path/accelerometer_data.csv'],
+        text: 'Accelerometer Data');
+  }
 }
-class DrawingPainter extends CustomPainter{
+
+class DrawingPainter extends CustomPainter {
   DrawingPainter(this.lines);
   final List<List<DotInfo>> lines;
   @override
   void paint(Canvas canvas, Size size) {
-    for(var oneLine in lines){
+    for (var oneLine in lines) {
       Color color = Colors.black;
       double size = 5;
       var l = <Offset>[];
       var p = Path();
-      for(var oneDot in oneLine){
+      for (var oneDot in oneLine) {
         color = oneDot.color;
         size = oneDot.size;
         l.add(oneDot.offset);
       }
       p.addPolygon(l, false);
-      canvas.drawPath(p, Paint()..color = color..strokeWidth=size..strokeCap=StrokeCap.round..style=PaintingStyle.stroke);
+      canvas.drawPath(
+          p,
+          Paint()
+            ..color = color
+            ..strokeWidth = size
+            ..strokeCap = StrokeCap.round
+            ..style = PaintingStyle.stroke);
     }
   }
 

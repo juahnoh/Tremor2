@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "697445270339",
+    "firebase_url": "https://tremor-32fd3-default-rtdb.firebaseio.com",
+    "project_id": "tremor-32fd3",
+    "storage_bucket": "tremor-32fd3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:697445270339:android:7626e41c273353277d25f6",
+        "android_client_info": {
+          "package_name": "com.juahn.tremor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "697445270339-plk4246vic27o02ivdhvhm0p55ujp82r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDo6yQgLMrfDQFZ2AKVaUagYIngeTXVNBI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "697445270339-plk4246vic27o02ivdhvhm0p55ujp82r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "697445270339-079sedtrn8kn5h68kqdnddi72oui60vp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.tremor.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -28,7 +28,10 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+
+  screenshot: ^2.1.0
   sensors_plus:
+  excel: 2.1.0
   flutter:
     sdk: flutter
   provider:
@@ -42,10 +45,17 @@ dependencies:
   path_provider: ^2.1.0
   csv: ^5.0.2
   share: ^2.0.4
+  image_gallery_saver: ^1.6.9
+  permission_handler: ^8.1.1
+  firebase_storage: ^11.2.6
+  firebase_core: ^2.15.1
+  firebase_database: ^10.2.5
+  tilt: ^0.0.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

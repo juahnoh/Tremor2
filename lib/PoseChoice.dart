@@ -3,7 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:tremor/Pose1/Pose1Record_screen.dart';
 import 'package:tremor/Pose2/Pose2Record_screen.dart';
 import 'package:tremor/Pose3/Pose3Record_screen.dart';
-import 'package:tremor/Progressing_screen.dart';
+import 'package:tremor/Pose4/Pose4Record_screen.dart';
+import 'package:tremor/home.dart';
 import 'dart:ui';
 import 'package:tremor/patientInfo_screen.dart';
 import 'package:tremor/local_utils/DrawingProvider.dart';
@@ -21,6 +22,7 @@ class _PoseChoiceState extends State<PoseChoice> {
   String first = 'POSE 1';
   String second = 'POSE 2';
   String third = 'POSE 3';
+  String fourth = 'POSE 4';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,7 +47,7 @@ class _PoseChoiceState extends State<PoseChoice> {
                       MaterialPageRoute(
                         builder: (context) => ChangeNotifierProvider(
                           create: (context) => DrawingProvider(),
-                          child: const Pose1Record(),
+                          child: Pose1Record(patientNum: widget.patientNum),
                         ),
                       ),
                     );
@@ -78,7 +80,7 @@ class _PoseChoiceState extends State<PoseChoice> {
                       MaterialPageRoute(
                         builder: (context) => ChangeNotifierProvider(
                           create: (context) => DrawingProvider(),
-                          child: const Pose2Record(),
+                          child: Pose2Record(patientNum: widget.patientNum),
                         ),
                       ),
                     );
@@ -111,7 +113,7 @@ class _PoseChoiceState extends State<PoseChoice> {
                       MaterialPageRoute(
                         builder: (context) => ChangeNotifierProvider(
                           create: (context) => DrawingProvider(),
-                          child: const Pose3Record(),
+                          child: Pose3Record(patientNum: widget.patientNum),
                         ),
                       ),
                     );
@@ -135,6 +137,39 @@ class _PoseChoiceState extends State<PoseChoice> {
                   ),
                 ),
                 const SizedBox(
+                  height: 30,
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChangeNotifierProvider(
+                          create: (context) => DrawingProvider(),
+                          child: Pose4Record(patientNum: widget.patientNum),
+                        ),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                      side: const BorderSide(width: 3, color: Colors.black),
+                      elevation: 3,
+                      shadowColor: Colors.black,
+                      fixedSize: const Size.fromHeight(65),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)),
+                      backgroundColor: Colors.grey),
+                  child: Center(
+                    child: Text(
+                      fourth,
+                      style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                const SizedBox(
                   height: 40,
                 ),
                 IconButton(
@@ -142,7 +177,7 @@ class _PoseChoiceState extends State<PoseChoice> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const Progressing()),
+                            builder: (context) => const Home()),
                       );
                     },
                     icon: const Icon(

@@ -1,7 +1,7 @@
 import 'package:tremor/patientInfo_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:tremor/viewdata.dart';
 import 'dart:ui';
+//import 'dart:html' as html;
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -79,12 +79,7 @@ class _HomeState extends State<Home> {
       ),
       ),
       onPressed: (){
-      Navigator.push(
-      context,
-      MaterialPageRoute(
-      builder: (context) =>
-      ViewData()),
-      );
+          //html.window.open('https://tremor-32fd3-default-rtdb.firebaseio.com/', 'new tab');
       }
       )
       ),

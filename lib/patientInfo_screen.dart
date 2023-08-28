@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:flutter/services.dart';
 import 'package:tremor/PoseChoice.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class patientInfo extends StatefulWidget {
   const patientInfo({super.key});
@@ -12,10 +13,16 @@ class patientInfo extends StatefulWidget {
 class _patientInfoState extends State<patientInfo> {
   TextEditingController patientNumber = TextEditingController();
   String age = '';
-  late DateTime Date;
+  late DateTime Date ;
   TextEditingController dateInput = TextEditingController();
   String Sex = 'NA';
   bool history = false;
+  late DatabaseReference dataRef;
+  @override
+  void initState(){
+    super.initState();
+    dataRef = FirebaseDatabase.instance.ref('patient information list');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,6 +115,7 @@ class _patientInfoState extends State<patientInfo> {
                                 pickedDate.toString().substring(0, 10);
                             setState(() {
                               dateInput.text = formedDate;
+                              Date = pickedDate;
                             });
                           }
                         },
@@ -192,10 +200,12 @@ class _patientInfoState extends State<patientInfo> {
                 ),
                 IconButton(
                   onPressed: () {
+                    sendData();
                     Navigator.of(context).push(
                       MaterialPageRoute(
                           builder: (context) =>
                               PoseChoice(patientNum: patientNumber.text)),
+
                     );
                   },
                   icon: const Icon(Icons.check_box_outlined),
@@ -206,5 +216,14 @@ class _patientInfoState extends State<patientInfo> {
         ),
       ),
     );
+  }
+  void sendData() async{
+    return await dataRef.child('patient ${patientNumber.text.toString()}').push().set({
+      'Patient Num' : '${patientNumber.text}',
+      'Age' : '$age',
+      'Date' : '${Date.toString().substring(0, 10)}',
+      'Sex' : '$Sex',
+      'Diagnosed history' : '$history' ,
+    });
   }
 }

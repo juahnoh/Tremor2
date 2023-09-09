@@ -83,7 +83,7 @@ class _Pose3RecordState extends State<Pose3Record> {
     if (_gyroAvailable) {
       final stream = await SensorManager().sensorUpdates(
         sensorId: Sensors.GYROSCOPE,
-        interval: const Duration(milliseconds: 50),
+        interval: const Duration(milliseconds: 5),
       );
       _gyroSubscription = stream.listen((sensorEvent) {
         setState(() {
@@ -103,7 +103,7 @@ class _Pose3RecordState extends State<Pose3Record> {
     if (_accelAvailable) {
       final stream = await SensorManager().sensorUpdates(
         sensorId: Sensors.ACCELEROMETER,
-        interval: const Duration(milliseconds: 50),
+        interval: const Duration(milliseconds: 5),
       );
       _accelSubscription = stream.listen((sensorEvent) {
         setState(() {
@@ -249,7 +249,7 @@ class _Pose3RecordState extends State<Pose3Record> {
     this.setState(() {
       loading = true;
     });
-    Reference storageReferenceA = storage.ref().child("#${widget.patientNum}_accPose3_${DateTime.now().minute}.cvs");
+    Reference storageReferenceA = storage.ref().child("#${widget.patientNum}_accPose3_${DateTime.now().minute}.csv");
     UploadTask uploadTaskA = storageReferenceA.putFile(fileA);
     await uploadTaskA.whenComplete(() =>
         this.setState(() {
@@ -270,7 +270,7 @@ class _Pose3RecordState extends State<Pose3Record> {
     this.setState(() {
       loading = true;
     });
-    Reference storageReferenceG = storage.ref().child("#${widget.patientNum}_gyroPose3_${DateTime.now().minute}.cvs");
+    Reference storageReferenceG = storage.ref().child("#${widget.patientNum}_gyroPose3_${DateTime.now().minute}.csv");
     UploadTask uploadTaskG = storageReferenceG.putFile(fileG);
     await uploadTaskG.whenComplete(() =>
         this.setState(() {

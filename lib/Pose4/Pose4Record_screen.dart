@@ -30,7 +30,7 @@ class _Pose4RecordState extends State<Pose4Record> {
   final controller = ScreenshotController();
 
   bool _isRecording = false;
-  int _secondsLeft = 60;
+  int _secondsLeft = 20;
   late Timer _timer;
 
   bool _accelAvailable = false;

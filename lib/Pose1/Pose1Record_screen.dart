@@ -16,7 +16,7 @@ class Pose1Record extends StatefulWidget {
 
 class _Pose1RecordState extends State<Pose1Record> {
   bool _isRecording = false;
-  int _secondsLeft = 10;
+  int _secondsLeft = 60;
   late Timer _timer;
 
   bool _gyroAvailable = false;
@@ -83,7 +83,7 @@ class _Pose1RecordState extends State<Pose1Record> {
     if (_gyroAvailable) {
       final stream = await SensorManager().sensorUpdates(
         sensorId: Sensors.GYROSCOPE,
-        interval: const Duration(milliseconds: 50),
+        interval: const Duration(milliseconds: 5),
       );
       _gyroSubscription = stream.listen((sensorEvent) {
         setState(() {
@@ -103,7 +103,7 @@ class _Pose1RecordState extends State<Pose1Record> {
     if (_accelAvailable) {
       final stream = await SensorManager().sensorUpdates(
         sensorId: Sensors.ACCELEROMETER,
-        interval: const Duration(milliseconds: 50),
+        interval: const Duration(milliseconds: 5),
       );
       _accelSubscription = stream.listen((sensorEvent) {
         setState(() {
@@ -126,7 +126,7 @@ class _Pose1RecordState extends State<Pose1Record> {
     }
     setState(() {
       _isRecording = false;
-      _secondsLeft = 10;
+      _secondsLeft = 60;
     });
     _printTable();
   }
@@ -249,7 +249,7 @@ class _Pose1RecordState extends State<Pose1Record> {
     this.setState(() {
       loading = true;
     });
-    Reference storageReferenceA = storage.ref().child("#${widget.patientNum}_accPose1_${DateTime.now().minute}.cvs");
+    Reference storageReferenceA = storage.ref().child("#${widget.patientNum}_accPose1_${DateTime.now().minute}.csv");
     UploadTask uploadTaskA = storageReferenceA.putFile(fileA);
     await uploadTaskA.whenComplete(() =>
         this.setState(() {
@@ -270,7 +270,7 @@ class _Pose1RecordState extends State<Pose1Record> {
     this.setState(() {
       loading = true;
     });
-    Reference storageReferenceG = storage.ref().child("#${widget.patientNum}_gyroPose1_${DateTime.now().minute}.cvs");
+    Reference storageReferenceG = storage.ref().child("#${widget.patientNum}_gyroPose1_${DateTime.now().minute}.csv");
     UploadTask uploadTaskG = storageReferenceG.putFile(fileG);
     await uploadTaskG.whenComplete(() =>
         this.setState(() {

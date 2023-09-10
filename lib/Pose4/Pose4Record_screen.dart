@@ -12,6 +12,7 @@ import 'package:tremor/local_utils/DrawingProvider.dart';
 import 'package:provider/provider.dart';
 import '../../dotinfo.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 
 
 class Pose4Record extends StatefulWidget {
@@ -32,16 +33,61 @@ class _Pose4RecordState extends State<Pose4Record> {
   bool _isRecording = false;
   int _secondsLeft = 20;
   late Timer _timer;
-
+  bool _gyroAvailable = false;
   bool _accelAvailable = false;
+  List<double> _gyroData = List.filled(3, 0.0);
   List<double> _accelData = List.filled(3, 0.0);
+  StreamSubscription? _gyroSubscription;
   StreamSubscription? _accelSubscription;
-  final List<List<dynamic>> _dataStorage = [];
-
+  final List<List<dynamic>> _dataStorageG = [];
+  final List<List<dynamic>> _dataStorageA = [];
   bool loading = false;
 
   FirebaseStorage storage = FirebaseStorage.instance;
+  void sendfileA () async{
+    final directoryA = await getApplicationDocumentsDirectory();
+    final pathA = directoryA.path;
+    final File fileA = File('$pathA/accelerometer_data.csv');
 
+
+    String csvDataA = const ListToCsvConverter().convert(_dataStorageA);
+    await fileA.writeAsString(csvDataA);
+
+    if(fileA==null) return;
+
+    this.setState(() {
+      loading = true;
+    });
+    Reference storageReferenceA = storage.ref().child("#${widget.patientNum}_accPose3_${DateTime.now().minute}.csv");
+    UploadTask uploadTaskA = storageReferenceA.putFile(fileA);
+    await uploadTaskA.whenComplete(() =>
+        this.setState(() {
+          loading = false;
+        }
+        )
+    );
+  }
+  void sendfileG () async{
+    final directoryG = await getApplicationDocumentsDirectory();
+    final pathG = directoryG.path;
+    final File fileG = File('$pathG/gyroscope_data.csv');
+    String csvDataG = const ListToCsvConverter().convert(_dataStorageG);
+    await fileG.writeAsString(csvDataG);
+
+    if(fileG==null) return;
+
+    this.setState(() {
+      loading = true;
+    });
+    Reference storageReferenceG = storage.ref().child("#${widget.patientNum}_gyroPose3_${DateTime.now().minute}.csv");
+    UploadTask uploadTaskG = storageReferenceG.putFile(fileG);
+    await uploadTaskG.whenComplete(() =>
+        this.setState(() {
+          loading = false;
+        }
+        )
+    );
+  }
   void sendImage () async{
     final image = await controller.capture();
     if(image==null) return;
@@ -63,7 +109,80 @@ class _Pose4RecordState extends State<Pose4Record> {
   @override
   void initState() {
     super.initState();
+    _checkGyroroscopeStatus();
+    _checkAccelerometerStatus();
   }
+
+  void _checkGyroroscopeStatus() async {
+    await SensorManager()
+        .isSensorAvailable(Sensors.GYROSCOPE)
+        .then((result) {
+      setState(() {
+        _gyroAvailable = result;
+      });
+    });
+  }
+  void _checkAccelerometerStatus() async {
+    await SensorManager()
+        .isSensorAvailable(Sensors.ACCELEROMETER)
+        .then((result) {
+      setState(() {
+        _accelAvailable = result;
+      });
+    });
+  }
+
+  Future<void> _startGyroscope() async {
+    if (_gyroSubscription != null) return;
+    if (_gyroAvailable) {
+      final stream = await SensorManager().sensorUpdates(
+        sensorId: Sensors.GYROSCOPE,
+        interval: const Duration(milliseconds: 5),
+      );
+      _gyroSubscription = stream.listen((sensorEvent) {
+        setState(() {
+          _gyroData = sensorEvent.data;
+          _dataStorageG.add([
+            DateTime.now().millisecondsSinceEpoch,
+            _gyroData[0],
+            _gyroData[1],
+            _gyroData[2]
+          ]);
+        });
+      });
+    }
+  }
+  Future<void> _startAccelerometer() async {
+    if (_accelSubscription != null) return;
+    if (_accelAvailable) {
+      final stream = await SensorManager().sensorUpdates(
+        sensorId: Sensors.ACCELEROMETER,
+        interval: const Duration(milliseconds: 5),
+      );
+      _accelSubscription = stream.listen((sensorEvent) {
+        setState(() {
+          _accelData = sensorEvent.data;
+          _dataStorageA.add([
+            DateTime.now().millisecondsSinceEpoch,
+            _accelData[0],
+            _accelData[1],
+            _accelData[2]
+          ]);
+        });
+      });
+    }
+  }
+  void _stopGyroscope() {
+    if (_gyroSubscription == null) return;
+    _gyroSubscription?.cancel();
+    _gyroSubscription = null;
+  }
+  void _stopAccelerometer() {
+    if (_accelSubscription == null) return;
+    _accelSubscription?.cancel();
+    _accelSubscription = null;
+  }
+
 
   @override
   void didChangeDependencies() {
@@ -71,7 +190,7 @@ class _Pose4RecordState extends State<Pose4Record> {
     dWidth = MediaQuery.of(context).size.width;
     dLength = MediaQuery.of(context).size.height;
     posX = dWidth/2 ;
-    posY = dLength/4;
+    posY = dLength/9;
   }
 
   @override
@@ -102,8 +221,12 @@ class _Pose4RecordState extends State<Pose4Record> {
                     setState(() {
                       if (_isRecording) {
                         _pauseTimer();
+                        _stopGyroscope();
+                        _stopAccelerometer();
                       } else {
                         _startTimer();
+                        _startGyroscope();
+                        _startAccelerometer();
                         _isRecording = true;
                       }
                     });
@@ -113,31 +236,41 @@ class _Pose4RecordState extends State<Pose4Record> {
                   '00:${_secondsLeft.toString().padLeft(2, '0')}',
                   style: const TextStyle(fontSize: 20),
                 ),
-                Screenshot(
-                  controller: controller,
-                  child: SizedBox(
-                    width: dWidth,
-                    height: dWidth,
-                    child: Center(
-                      child:  StreamBuilder<s.GyroscopeEvent>(
-                          stream: s.SensorsPlatform.instance.gyroscopeEvents,
-                          builder: (context, snapshot) {
-                            if (_isRecording && snapshot.hasData) {
-                              posX = posX + (snapshot.data!.y * 15);
-                              posY = posY + (snapshot.data!.x * 15);
+                SizedBox(
+                  width: dWidth,
+                  height: dWidth,
+                  child: Center(
+                    child:  StreamBuilder<s.GyroscopeEvent>(
+                        stream: s.SensorsPlatform.instance.gyroscopeEvents,
+                        builder: (context, snapshot) {
+                          if (_isRecording && snapshot.hasData) {
+                            posX = posX + (snapshot.data!.y * 15);
+                            posY = posY + (snapshot.data!.x * 15);
 
-                              if (posY > (dLength/4 + 150)) posY = dLength/4 + 150;
-                              if (posY < (dLength/4 - 150)) posY = dLength/4 - 150;
-                              if (posX > (dWidth/2 + 150)) posX = dWidth/2 + 150;
-                              if (posX < (dWidth/2 - 150)) posX = dWidth/2 - 150;
+                            if (posY > (dLength/4 + 150)) posY = dLength/4 + 150;
+                            if (posY < (dLength/4 - 150)) posY = dLength/4 - 150;
+                            if (posX > (dWidth/2 + 150)) posX = dWidth/2 + 150;
+                            if (posX < (dWidth/2 - 150)) posX = dWidth/2 - 150;
 
-                              p.drawStart(Offset(posX, posY));
-                              p.drawing(Offset(posX, posY));
-                            }
-                            return Scaffold(
+                            p.drawStart(Offset(posX, posY));
+                            p.drawing(Offset(posX, posY));
+                          }
+                          return Screenshot(
+                            controller: controller,
+                            child: Scaffold(
                               body: Stack(
                                 children: [
                                   Center(child: Icon(Icons.circle ,size: 350,color: Colors.grey,)),
+                                  (_isRecording)? Center(child: CircularPercentIndicator(
+                                    animation: true,
+                                    animationDuration: 20000,
+                                    percent: 1.0,
+                                    radius: 120,
+                                    lineWidth: 30,
+                                    progressColor: Colors.white,
+                                    backgroundColor: Colors.grey,
+                                    circularStrokeCap: CircularStrokeCap.round,
+                                  )):Center(),
                                   Center(child: Icon(Icons.circle ,size: 150,color: Colors.white,)),
                                   Positioned.fill(
                                     child:
@@ -146,22 +279,26 @@ class _Pose4RecordState extends State<Pose4Record> {
                                   Transform.translate(
                                     offset: Offset(posX, posY),
                                     child: const CircleAvatar(
-                                      radius: 5,
+                                      radius: 10,
                                       backgroundColor: Colors.red,
                                     ),
                                   ),
                                 ],
                               ),
-                            );
-                          }),
-                    ),
+                            ),
+                          );
+                        }),
                   ),
                 ),
                 const SizedBox(height: 5),
                 IconButton(
                     iconSize: 50,
                     color: Colors.black,
-                    onPressed: (){sendImage();} ,
+                    onPressed: (){
+                      sendImage();
+                      sendfileA();
+                      sendfileG();
+                      } ,
                     icon: const Icon(Icons.camera_alt_outlined)),
                 IconButton(
                     iconSize: 30,
@@ -202,20 +339,26 @@ class _Pose4RecordState extends State<Pose4Record> {
     _timer.cancel();
     setState(() {
       _isRecording = false;
-      _secondsLeft = 60;
+      _secondsLeft = 20;
     });
     Navigator.of(context).popUntil((route) => route.isCurrent);
   }
-
-
-
+  void dispose() {
+    if (_timer.isActive) {
+      _timer.cancel();
+    }
+    _stopAccelerometer();
+    _stopGyroscope();
+    super.dispose();
+  }
+  
   void _resetTimer() {
     if (_timer.isActive) {
       _timer.cancel();
     }
     setState(() {
       _isRecording = false;
-      _secondsLeft = 60;
+      _secondsLeft = 20;
     });
   }
 }

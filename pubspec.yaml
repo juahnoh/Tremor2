@@ -30,6 +30,7 @@ environment:
 dependencies:
 
   screenshot: ^2.1.0
+  percent_indicator:
   sensors_plus:
   excel: 2.1.0
   flutter:

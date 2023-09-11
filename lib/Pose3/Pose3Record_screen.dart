@@ -41,6 +41,8 @@ class _Pose3RecordState extends State<Pose3Record> {
       if (_secondsLeft == 0) {
         _isRecording=false;
         timer.cancel();
+        _stopAccelerometer();
+        _stopGyroscope();
       }
       if (_isRecording) {
         setState(() {

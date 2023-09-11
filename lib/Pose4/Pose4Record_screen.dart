@@ -312,20 +312,22 @@ class _Pose4RecordState extends State<Pose4Record> {
     );
   }
 
-  void _startTimer() {
+ void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_secondsLeft == 0) {
+        _isRecording=false;
+        timer.cancel();
+        _stopAccelerometer();
+        _stopGyroscope();
+      }
       if (_isRecording) {
         setState(() {
           _secondsLeft--;
         });
       }
-
-      if (_secondsLeft == 0) {
-        _resetTimer();
-      }
     });
   }
-
+  
   void _pauseTimer() {
     if (_timer.isActive) {
       _timer.cancel();

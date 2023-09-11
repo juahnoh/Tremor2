@@ -58,7 +58,7 @@ class _Pose4RecordState extends State<Pose4Record> {
     this.setState(() {
       loading = true;
     });
-    Reference storageReferenceA = storage.ref().child("#${widget.patientNum}_accPose3_${DateTime.now().minute}.csv");
+    Reference storageReferenceA = storage.ref().child("#${widget.patientNum}_accPose4_${DateTime.now().minute}.csv");
     UploadTask uploadTaskA = storageReferenceA.putFile(fileA);
     await uploadTaskA.whenComplete(() =>
         this.setState(() {
@@ -79,7 +79,7 @@ class _Pose4RecordState extends State<Pose4Record> {
     this.setState(() {
       loading = true;
     });
-    Reference storageReferenceG = storage.ref().child("#${widget.patientNum}_gyroPose3_${DateTime.now().minute}.csv");
+    Reference storageReferenceG = storage.ref().child("#${widget.patientNum}_gyroPose4_${DateTime.now().minute}.csv");
     UploadTask uploadTaskG = storageReferenceG.putFile(fileG);
     await uploadTaskG.whenComplete(() =>
         this.setState(() {
@@ -343,6 +343,7 @@ class _Pose4RecordState extends State<Pose4Record> {
     });
     Navigator.of(context).popUntil((route) => route.isCurrent);
   }
+  @override
   void dispose() {
     if (_timer.isActive) {
       _timer.cancel();
@@ -351,7 +352,7 @@ class _Pose4RecordState extends State<Pose4Record> {
     _stopGyroscope();
     super.dispose();
   }
-  
+
   void _resetTimer() {
     if (_timer.isActive) {
       _timer.cancel();
@@ -360,6 +361,18 @@ class _Pose4RecordState extends State<Pose4Record> {
       _isRecording = false;
       _secondsLeft = 20;
     });
+    _printTable();
+  }
+
+
+  // Print the table (data) in the console
+  void _printTable() {
+    for (var row in _dataStorageA) {
+      print(row);
+    }
+    for (var row in _dataStorageG) {
+      print(row);
+    }
   }
 }
 

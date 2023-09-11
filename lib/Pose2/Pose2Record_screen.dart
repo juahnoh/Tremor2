@@ -41,6 +41,8 @@ class _Pose2RecordState extends State<Pose2Record> {
       if (_secondsLeft == 0) {
         _isRecording=false;
         timer.cancel();
+        _stopAccelerometer();
+        _stopGyroscope();
       }
       if (_isRecording) {
         setState(() {

@@ -261,13 +261,13 @@ class _Pose4RecordState extends State<Pose4Record> {
                               body: Stack(
                                 children: [
                                   Center(child: Icon(Icons.circle ,size: 350,color: Colors.grey,)),
-                                  (_isRecording)? Center(child: CircularPercentIndicator(
+                                  (!_isRecording&&_secondsLeft!=0)? Center(child: CircularPercentIndicator(
                                     animation: true,
                                     animationDuration: 20000,
                                     percent: 1.0,
-                                    radius: 120,
-                                    lineWidth: 30,
-                                    progressColor: Colors.white,
+                                    radius: 100,
+                                    lineWidth: 5,
+                                    progressColor: Colors.black,
                                     backgroundColor: Colors.grey,
                                     circularStrokeCap: CircularStrokeCap.round,
                                   )):Center(),
@@ -312,22 +312,21 @@ class _Pose4RecordState extends State<Pose4Record> {
     );
   }
 
- void _startTimer() {
+  void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_secondsLeft == 0) {
-        _isRecording=false;
-        timer.cancel();
-        _stopAccelerometer();
-        _stopGyroscope();
-      }
       if (_isRecording) {
         setState(() {
           _secondsLeft--;
         });
       }
+
+      if (_secondsLeft == 0) {
+        _isRecording=false;
+        timer.cancel();
+      }
     });
   }
-  
+
   void _pauseTimer() {
     if (_timer.isActive) {
       _timer.cancel();
